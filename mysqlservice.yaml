@@ -1,0 +1,50 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: capstone
+  labels:
+    name: mysqlservice
+  name: mysqlservicesvc
+spec:
+  ports:
+  - port: 3306
+  clusterIP: None  
+  selector:
+    name: mysqlservice
+...
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: capstone
+  labels:
+    name: mysqlservice
+  name: mysqlservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: mysqlservice
+  template:
+    metadata:
+      labels:
+        name: mysqlservice
+    spec:
+      containers:
+      - env:
+        - name: MYSQL_ALLOW_EMPTY_PASSWORD
+          value: "yes"
+        - name: MYSQL_DATABASE
+          value: AuthenticationDB
+        - name: MYSQL_ROOT_PASSWORD
+          value: Global@145#
+        - name: MYSQL_USERNAME
+          value: root
+        image: shubh1254/mysql:latest
+        name: mysql-container
+        ports:
+        - containerPort: 3306
+      restartPolicy: Always
+...

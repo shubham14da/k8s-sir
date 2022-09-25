@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: capstone
+  labels:
+    name: configserver
+  name: configserversvc
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8888
+    targetPort: 8888
+  selector:
+    name: configserver
+...
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: capstone
+  labels:
+    name: configserver
+  name: configserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: configserver
+  template:
+    metadata:
+      labels:
+        name: configserver
+    spec:
+      containers:
+      - image: shubh1254/configserver:latest
+        name: config-server-container
+        env:
+        - name: eureka.client.serviceUrl.defaultZone
+          value: http://eurekaserversvc:8761/eureka
+        ports:
+        - containerPort: 8888
+...

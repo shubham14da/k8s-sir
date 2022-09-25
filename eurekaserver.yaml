@@ -1,0 +1,60 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  
+  namespace: capstone
+  labels:
+    name: eurekaserver
+  name: eurekaserversvc
+spec:
+  type: NodePort
+  ports:
+  - port: 8761
+    targetPort: 8761
+    nodePort: 30041
+  selector:
+    name: eurekaserver
+...
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: capstone
+  labels:
+    name: eurekaserver
+  name: eurekaserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: eurekaserver
+  template:
+    metadata:
+      labels:
+        name: eurekaserver
+    spec:
+      containers:
+      - image: shubh1254/eurekaserver:latest
+        name: eureka-server-container
+        ports:
+        - containerPort: 8761
+        env:
+        - name: MY_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+          # Due to camelcase issues with "defaultZone" and "preferIpAddress", _JAVA_OPTIONS is used here
+        - name: _JAVA_OPTIONS
+          value: -Deureka.instance.preferIpAddress=false -Deureka.client.serviceUrl.defaultZone=http://eurekaserversvc:8761/eureka/
+        - name: EUREKA_CLIENT_REGISTERWITHEUREKA
+          value: "true"
+        - name: EUREKA_CLIENT_FETCHREGISTRY
+          value: "true"
+        # The hostnames must match with the the eureka serviceUrls, otherwise the replicas are reported as unavailable in the eureka dashboard      
+        - name: EUREKA_INSTANCE_HOSTNAME
+          value: eurekaserversvc
+        - name: eureka.client.serviceUrl.default-zone
+          value: http://eurekaserversvc/8761/eureka/
+...

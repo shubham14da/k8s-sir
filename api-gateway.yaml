@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: capstone
+  labels:
+    name: api-gateway
+  name: api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: api-gateway
+  template:
+    metadata:
+      labels:
+        name: api-gateway
+    spec:
+      containers:
+      - image: shubh1254/api-gateway:latest
+        name: api-gateway-container
+        env:
+        - name: eureka.client.serviceUrl.defaultZone
+          value: http://eurekaserversvc:8761/eureka
+        - name: paymentservicesvc
+          value: paymentservicesvc
+        - name: authenticationservicesvc
+          value: authenticationservicesvc
+        - name: emailservicesvc
+          value: emailservicesvc
+        - name: appointmentservicesvc
+          value: appointmentservicesvc
+        - name: userservicesvc
+          value: userservicesvc
+        - name: productwebappsvc
+          value: productwebappsvc
+        ports:
+        - containerPort: 8080
+...
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: capstone
+  labels:
+    name: api-gateway
+  name: apigatewaysvc
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetport: 8080
+    nodePort: 30036
+  selector:
+    name: api-gateway
+... 

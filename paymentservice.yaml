@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  
+  namespace: capstone
+  labels:
+    name: paymentservice
+  name: paymentservicesvc
+spec:
+  ports:
+  - port: 8089
+    targetport: 8089
+  selector:
+    name: paymentservice
+...
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: capstone
+  labels:
+    name: paymentservice
+  name: paymentservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: paymentservice
+  template:
+    metadata:
+      labels:
+        name: paymentservice
+    spec:
+      containers:
+      - image: shubh1254/paymentservice:latest
+        name: payment-service-container
+        env:
+        - name: eureka.client.serviceUrl.defaultZone
+          value: http://eurekaserversvc:8761/eureka
+        ports:
+        - containerPort: 8089
+...
